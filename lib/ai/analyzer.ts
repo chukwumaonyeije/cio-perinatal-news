@@ -81,24 +81,32 @@ export async function analyzeItem(item: ScrapedItem): Promise<EnrichedItem | nul
       return null;
     }
 
-    const analysis: AnalysisResult = JSON.parse(response);
+    // Parse model response; support both {relevanceScore} and {score}
+    const raw = JSON.parse(response as string) as any;
+    const relevanceScore: number | undefined =
+      typeof raw?.relevanceScore === 'number' ? raw.relevanceScore :
+      typeof raw?.score === 'number' ? raw.score : undefined;
+    const summary: string | undefined = raw?.summary;
+    let category = raw?.category as TopicCategory | undefined;
+
+    // Fallback: derive category from item text if model didn't provide a valid one
+    const validCategories: TopicCategory[] = ['billing', 'gdm', 'preeclampsia', 'other'];
+    if (!category || !validCategories.includes(category)) {
+      category = categorizeTopic(`${item.title} ${item.content}`);
+    }
 
     // Validate the response
-    if (
-      typeof analysis.relevanceScore !== 'number' ||
-      !analysis.category ||
-      !analysis.summary
-    ) {
-      console.error('Invalid analysis result for:', item.url);
+    if (typeof relevanceScore !== 'number' || !summary) {
+      console.error('Invalid analysis result for:', item.url, raw);
       return null;
     }
 
     // Create enriched item
     const enrichedItem: EnrichedItem = {
       ...item,
-      aiSummary: analysis.summary,
-      relevanceScore: Math.max(0, Math.min(10, Math.round(analysis.relevanceScore))), // Ensure 0-10 range
-      category: analysis.category,
+      aiSummary: summary,
+      relevanceScore: Math.max(0, Math.min(10, Math.round(relevanceScore))), // Ensure 0-10 range
+      category,
     };
 
     return enrichedItem;
