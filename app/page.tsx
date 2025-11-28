@@ -1,17 +1,17 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import Dashboard from '@/components/Dashboard';
 import { Database } from '@/lib/supabase/database.types';
 
 type NewsItem = Database['public']['Tables']['news_items']['Row'];
 
 export default async function Home() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   
-  // Fetch recent news items (last 7 days)
+  // Fetch recent news items (last 100)
   const { data, error } = await supabase
     .from('news_items')
     .select('*')
-    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(100);
 
   const newsItems = data as NewsItem[] | null;

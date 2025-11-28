@@ -26,14 +26,14 @@ export async function runAllScrapers(): Promise<{
 
   console.log('Starting scraper orchestration...');
 
-  // Run all scrapers in parallel (v2.0: added RSS and Bluesky)
+  // Run all scrapers in parallel (v2.0: added RSS, Bluesky disabled temporarily due to 403)
   const results = await Promise.allSettled([
     scrapeNewsAPI(),
     scrapeReddit(),
     scrapeLinkedIn(),
     scrapeTwitter(),
     scrapeRSS(),
-    scrapeBluesky(),
+    // scrapeBluesky(), // Temporarily disabled - returns 403
   ]);
 
   // Process results

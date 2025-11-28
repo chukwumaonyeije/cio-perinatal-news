@@ -5,27 +5,28 @@ const parser = new Parser();
 
 // High-value RSS feeds for MFM research and RCM news
 const RSS_FEEDS = [
-  // Healthcare Finance & RCM
-  {
-    url: 'https://www.fiercehealthcare.com/rss/finance',
-    source: 'Fierce Healthcare (Finance)',
-  },
+  // Healthcare Finance & RCM - Working feeds
   {
     url: 'https://www.healthcareitnews.com/rss/news',
     source: 'Healthcare IT News',
   },
   {
-    url: 'https://www.beckershospitalreview.com/rss/finance.xml',
+    url: 'https://www.beckershospitalreview.com/rss.xml',
     source: 'Becker\'s Hospital Review',
+  },
+  {
+    url: 'https://www.fiercehealthcare.com/rss',
+    source: 'Fierce Healthcare',
   },
   // Medical Journals - OBGYN/MFM
   {
     url: 'https://rss.sciencedirect.com/publication/science/00029378',
     source: 'AJOG (Gray Journal)',
   },
+  // Alternative medical news sources
   {
-    url: 'https://journals.lww.com/greenjournal/pages/rssfeed.aspx',
-    source: 'Obstetrics & Gynecology',
+    url: 'https://www.medpagetoday.com/rss/obgyn.xml',
+    source: 'MedPage Today - OBGYN',
   },
 ];
 
