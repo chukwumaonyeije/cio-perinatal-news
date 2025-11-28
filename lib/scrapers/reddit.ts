@@ -28,6 +28,8 @@ const SUBREDDITS = [
   'AskDocs',
   'medicalbilling',
   'healthIT',
+  // v2.0: Added for deeper RCM/billing insights
+  'MedicalCoding',
 ];
 
 /**

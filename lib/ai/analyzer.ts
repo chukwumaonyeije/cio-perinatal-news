@@ -2,9 +2,16 @@ import OpenAI from 'openai';
 import { ScrapedItem, EnrichedItem } from '../scrapers/types';
 import { TopicCategory, categorizeTopic } from '@/config/topics';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI;
+
+function getOpenAIClient() {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 interface AnalysisResult {
   relevanceScore: number;
@@ -12,12 +19,25 @@ interface AnalysisResult {
   summary: string;
 }
 
-const SYSTEM_PROMPT = `You are an expert Maternal-Fetal Medicine (MFM) research assistant analyzing medical news for a practicing MFM specialist.
+const SYSTEM_PROMPT = `You are an expert Maternal-Fetal Medicine (MFM) research assistant analyzing medical news for a practicing MFM specialist who is also a healthcare technology developer.
 
 Your task is to evaluate content relevance across three key areas:
-1. **Medical Billing Automation** - Healthcare RCM, claims processing, medical coding automation
-2. **Gestational Diabetes (GDM)** - CGM monitoring in pregnancy, glucose management
-3. **Preeclampsia/Hypertension/HG** - Gestational hypertension, hyperemesis gravidarum, HELLP syndrome, preeclampsia research
+
+1. **Revenue Cycle Management (RCM) & Billing Automation** - Focus on AUTOMATION and TECHNOLOGY:
+   - AI-powered autonomous coding and claims processing
+   - Denial management and predictive revenue analytics
+   - Prior authorization automation
+   - Payer policy changes affecting reimbursement
+   - Healthcare IT solutions for revenue integrity
+   - NOTE: Generic billing job postings or manual billing processes score LOW (0-3)
+   - High scores (7+) require focus on automation, AI, or breakthrough technology
+
+2. **Gestational Diabetes (GDM)** - CGM monitoring in pregnancy, glucose management, FDA approvals, reimbursement for CGM in pregnancy
+
+3. **High-Risk Pregnancy Research**:
+   - Preeclampsia: New biomarkers, prevention (aspirin/statins), long-term CV risks
+   - Hyperemesis Gravidarum (HG): New treatments, genetic research
+   - Gestational Hypertension: Chronic HTN management in pregnancy
 
 For each piece of content:
 - Rate relevance from 0-10 (0=irrelevant, 10=critical/groundbreaking)
@@ -26,9 +46,9 @@ For each piece of content:
 
 Scoring guidelines:
 - 9-10: Breakthrough research, major policy changes, game-changing technology
-- 7-8: Significant new findings, important updates, highly relevant to MFM practice
+- 7-8: Significant new findings, important updates, highly relevant to MFM practice OR tech development
 - 4-6: Moderately relevant, worth knowing about
-- 0-3: Tangentially related or not relevant to MFM practice
+- 0-3: Tangentially related, not relevant, or generic content without innovation
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -44,7 +64,7 @@ export async function analyzeItem(item: ScrapedItem): Promise<EnrichedItem | nul
   try {
     const userPrompt = `Title: ${item.title}\n\nContent: ${item.content.slice(0, 1000)}`; // Limit to 1000 chars to save tokens
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },

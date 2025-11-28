@@ -14,7 +14,7 @@ export interface Database {
           id: string
           url: string
           title: string
-          source: 'twitter' | 'linkedin' | 'reddit' | 'news'
+          source: 'twitter' | 'linkedin' | 'reddit' | 'news' | 'rss' | 'bluesky'
           content: string
           ai_summary: string | null
           relevance_score: number
@@ -27,7 +27,7 @@ export interface Database {
           id?: string
           url: string
           title: string
-          source: 'twitter' | 'linkedin' | 'reddit' | 'news'
+          source: 'twitter' | 'linkedin' | 'reddit' | 'news' | 'rss' | 'bluesky'
           content: string
           ai_summary?: string | null
           relevance_score: number
@@ -40,7 +40,7 @@ export interface Database {
           id?: string
           url?: string
           title?: string
-          source?: 'twitter' | 'linkedin' | 'reddit' | 'news'
+          source?: 'twitter' | 'linkedin' | 'reddit' | 'news' | 'rss' | 'bluesky'
           content?: string
           ai_summary?: string | null
           relevance_score?: number

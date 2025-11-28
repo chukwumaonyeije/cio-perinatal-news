@@ -1,6 +1,6 @@
 import { TopicCategory } from '@/config/topics';
 
-export type NewsSource = 'twitter' | 'linkedin' | 'reddit' | 'news';
+export type NewsSource = 'twitter' | 'linkedin' | 'reddit' | 'news' | 'rss' | 'bluesky';
 
 export interface ScrapedItem {
   url: string;

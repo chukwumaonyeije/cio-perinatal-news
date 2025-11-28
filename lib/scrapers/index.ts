@@ -2,6 +2,8 @@ import { scrapeNewsAPI } from './news-api';
 import { scrapeReddit } from './reddit';
 import { scrapeLinkedIn } from './linkedin-google';
 import { scrapeTwitter } from './twitter-apify';
+import { scrapeRSS } from './rss';
+import { scrapeBluesky } from './bluesky';
 import { ScrapedItem, ScraperResult } from './types';
 
 export interface ScraperSummary {
@@ -24,12 +26,14 @@ export async function runAllScrapers(): Promise<{
 
   console.log('Starting scraper orchestration...');
 
-  // Run all scrapers in parallel
+  // Run all scrapers in parallel (v2.0: added RSS and Bluesky)
   const results = await Promise.allSettled([
     scrapeNewsAPI(),
     scrapeReddit(),
     scrapeLinkedIn(),
     scrapeTwitter(),
+    scrapeRSS(),
+    scrapeBluesky(),
   ]);
 
   // Process results
@@ -38,6 +42,8 @@ export async function runAllScrapers(): Promise<{
     reddit: 0,
     linkedin: 0,
     twitter: 0,
+    rss: 0,
+    bluesky: 0,
   };
 
   for (const result of results) {
@@ -80,4 +86,4 @@ export async function runAllScrapers(): Promise<{
 }
 
 // Export individual scrapers for testing
-export { scrapeNewsAPI, scrapeReddit, scrapeLinkedIn, scrapeTwitter };
+export { scrapeNewsAPI, scrapeReddit, scrapeLinkedIn, scrapeTwitter, scrapeRSS, scrapeBluesky };
