@@ -21,10 +21,24 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ initialNewsItems }: DashboardProps) {
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(initialNewsItems);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<NewsItem[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Handler to update bookmark status in local state
+  const handleBookmarkUpdate = (itemId: string, bookmarked: boolean) => {
+    setNewsItems(prev => 
+      prev.map(item => item.id === itemId ? { ...item, bookmarked } : item)
+    );
+    // Also update search results if they exist
+    if (searchResults) {
+      setSearchResults(prev => 
+        prev ? prev.map(item => item.id === itemId ? { ...item, bookmarked } : item) : null
+      );
+    }
+  };
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -54,15 +68,15 @@ export default function Dashboard({ initialNewsItems }: DashboardProps) {
   };
 
   const filteredNews = useMemo(() => {
-    const items = searchResults !== null ? searchResults : initialNewsItems;
+    const items = searchResults !== null ? searchResults : newsItems;
     
     if (selectedCategory === 'all') return items;
     if (selectedCategory === 'starred') return items.filter((item) => item.bookmarked);
     return items.filter((item) => item.category === selectedCategory);
-  }, [initialNewsItems, searchResults, selectedCategory]);
+  }, [newsItems, searchResults, selectedCategory]);
 
   const counts = useMemo(() => {
-    const items = searchResults !== null ? searchResults : initialNewsItems;
+    const items = searchResults !== null ? searchResults : newsItems;
     const starredCount = items.filter(item => item.bookmarked).length;
     
     const categoryCounts = items.reduce(
@@ -73,7 +87,7 @@ export default function Dashboard({ initialNewsItems }: DashboardProps) {
       { all: items.length, billing: 0, gdm: 0, preeclampsia: 0, other: 0, starred: starredCount }
     );
     return categoryCounts;
-  }, [initialNewsItems, searchResults]);
+  }, [newsItems, searchResults]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -152,7 +166,7 @@ export default function Dashboard({ initialNewsItems }: DashboardProps) {
           ) : (
             <div className="space-y-6">
               {filteredNews.map((item) => (
-                <NewsCard key={item.id} item={item} />
+                <NewsCard key={item.id} item={item} onBookmarkUpdate={handleBookmarkUpdate} />
               ))}
             </div>
           )}

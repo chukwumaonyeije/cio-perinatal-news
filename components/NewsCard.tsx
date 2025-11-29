@@ -16,34 +16,48 @@ interface NewsItem {
 
 interface NewsCardProps {
   item: NewsItem;
+  onBookmarkUpdate?: (itemId: string, bookmarked: boolean) => void;
 }
 
-export default function NewsCard({ item }: NewsCardProps) {
+export default function NewsCard({ item, onBookmarkUpdate }: NewsCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(item.bookmarked);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleBookmarkToggle = async () => {
     if (isUpdating) return;
     
+    const newBookmarkedState = !isBookmarked;
+    
     // Optimistic update
-    setIsBookmarked(!isBookmarked);
+    setIsBookmarked(newBookmarkedState);
     setIsUpdating(true);
+    
+    // Notify parent component immediately
+    if (onBookmarkUpdate) {
+      onBookmarkUpdate(item.id, newBookmarkedState);
+    }
 
     try {
       const response = await fetch('/api/bookmark', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, bookmarked: !isBookmarked }),
+        body: JSON.stringify({ id: item.id, bookmarked: newBookmarkedState }),
       });
 
       if (!response.ok) {
         // Revert on error
         setIsBookmarked(isBookmarked);
+        if (onBookmarkUpdate) {
+          onBookmarkUpdate(item.id, isBookmarked);
+        }
         console.error('Failed to update bookmark');
       }
     } catch (error) {
       // Revert on error
       setIsBookmarked(isBookmarked);
+      if (onBookmarkUpdate) {
+        onBookmarkUpdate(item.id, isBookmarked);
+      }
       console.error('Error updating bookmark:', error);
     } finally {
       setIsUpdating(false);
