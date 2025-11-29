@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface NewsItem {
   id: string;
   title: string;
@@ -9,6 +11,7 @@ interface NewsItem {
   category: string;
   relevance_score: number;
   published_at: string | null;
+  bookmarked: boolean;
 }
 
 interface NewsCardProps {
@@ -16,6 +19,37 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({ item }: NewsCardProps) {
+  const [isBookmarked, setIsBookmarked] = useState(item.bookmarked);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleBookmarkToggle = async () => {
+    if (isUpdating) return;
+    
+    // Optimistic update
+    setIsBookmarked(!isBookmarked);
+    setIsUpdating(true);
+
+    try {
+      const response = await fetch('/api/bookmark', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, bookmarked: !isBookmarked }),
+      });
+
+      if (!response.ok) {
+        // Revert on error
+        setIsBookmarked(isBookmarked);
+        console.error('Failed to update bookmark');
+      }
+    } catch (error) {
+      // Revert on error
+      setIsBookmarked(isBookmarked);
+      console.error('Error updating bookmark:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'billing':
@@ -61,9 +95,20 @@ export default function NewsCard({ item }: NewsCardProps) {
             {item.title}
           </a>
         </h2>
-        <span className={`ml-4 px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(item.relevance_score)}`}>
-          {item.relevance_score}/10
-        </span>
+        <div className="flex items-center gap-2 ml-4">
+          <button
+            onClick={handleBookmarkToggle}
+            disabled={isUpdating}
+            className="text-2xl hover:scale-110 transition-transform disabled:opacity-50"
+            aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark article'}
+            title={isBookmarked ? 'Remove bookmark' : 'Bookmark article'}
+          >
+            {isBookmarked ? '⭐' : '☆'}
+          </button>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(item.relevance_score)}`}>
+            {item.relevance_score}/10
+          </span>
+        </div>
       </div>
 
       {item.ai_summary && (

@@ -95,17 +95,16 @@ export async function getNewsItems(filters: NewsItemFilters = {}) {
 }
 
 /**
- * Search news items by text query
+ * Search news items by text query (searches both title and content)
  */
 export async function searchNewsItems(searchQuery: string, limit = 50) {
   const supabase = createAdminClient();
+  
+  // Use the full-text search index that covers both title and content
   const { data, error } = await supabase
     .from('news_items')
     .select('*')
-    .textSearch('title', searchQuery, {
-      type: 'websearch',
-      config: 'english',
-    })
+    .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%,ai_summary.ilike.%${searchQuery}%`)
     .order('created_at', { ascending: false })
     .limit(limit);
 

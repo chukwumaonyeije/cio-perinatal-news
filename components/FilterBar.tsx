@@ -9,12 +9,14 @@ interface FilterBarProps {
     gdm: number;
     preeclampsia: number;
     other: number;
+    starred: number;
   };
 }
 
 export default function FilterBar({ selectedCategory, onCategoryChange, counts }: FilterBarProps) {
   const categories = [
     { id: 'all', label: 'All', count: counts.all, color: 'blue' },
+    { id: 'starred', label: '⭐ Starred', count: counts.starred, color: 'yellow' },
     { id: 'billing', label: 'Billing', count: counts.billing, color: 'purple' },
     { id: 'gdm', label: 'GDM', count: counts.gdm, color: 'blue' },
     { id: 'preeclampsia', label: 'Preeclampsia', count: counts.preeclampsia, color: 'red' },
@@ -30,6 +32,7 @@ export default function FilterBar({ selectedCategory, onCategoryChange, counts }
         purple: 'bg-purple-600 text-white border-purple-600',
         red: 'bg-red-600 text-white border-red-600',
         gray: 'bg-gray-600 text-white border-gray-600',
+        yellow: 'bg-yellow-500 text-white border-yellow-500',
       };
       return colorMap[color] || colorMap.blue;
     }
